@@ -13,7 +13,7 @@
     </div>
 
     <div class="hero-card">
-        <img src="images/images.jfif" alt="Школа">
+        <HeroSlider Slides="heroSlides" IntervalSeconds="5" />
         <div class="floating-box">Навчання • Заходи • Розклад</div>
     </div>
 </section>
@@ -95,3 +95,14 @@
         </div>
     </div>
 </section>
+
+@code {
+    // Додайте фото в wwwroot/images/ і впишіть шлях нижче
+    private static readonly IReadOnlyList<HeroSlider.HeroSlide> heroSlides =
+    [
+        new("images/images.jfif", "Шкільний захід"),
+        new("images/school.svg", "Школа"),
+        // new("images/photo2.jpg", "Опис фото"),
+        // new("images/photo3.jpg", "Опис фото"),
+    ];
+}

@@ -3,99 +3,98 @@
 
 @inject NavigationManager NavigationManager
 
-<header class="header">
-    <div class="header-glow" aria-hidden="true"></div>
-    <div class="header-inner">
-        <a class="logo" href="">
-            <span class="logo-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 3L2 9l10 6 10-6-10-6z" fill="currentColor" opacity="0.9"/>
-                    <path d="M6 12v5c0 0 3.5 2 6 2s6-2 6-2v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                    <path d="M20 10v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                </svg>
-            </span>
-            <span class="logo-text">
-                <strong>SchoolSpace</strong>
-                <small>Шкільний портал</small>
-            </span>
-        </a>
+<div class="site-header">
+    <header class="header">
+        <div class="header-glow" aria-hidden="true"></div>
+        <div class="header-inner">
+            <a class="logo" href="">
+                <span class="logo-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3L2 9l10 6 10-6-10-6z" fill="currentColor" opacity="0.9"/>
+                        <path d="M6 12v5c0 0 3.5 2 6 2s6-2 6-2v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M20 10v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                <span class="logo-text">
+                    <strong>SchoolSpace</strong>
+                    <small>Шкільний портал</small>
+                </span>
+            </a>
 
-        <div class="header-nav">
-            <div class="nav-pills">
-                <NavLink href="" Match="NavLinkMatch.All" class="nav-link" @onclick="CloseMenu">Головна</NavLink>
-                <a href="/#about" class="nav-link" @onclick="CloseMenu">Про школу</a>
-                <a href="/#schedule" class="nav-link" @onclick="CloseMenu">Розклад</a>
-                <a href="/#events" class="nav-link" @onclick="CloseMenu">Заходи</a>
+            <div class="header-nav">
+                <div class="nav-pills">
+                    <NavLink href="" Match="NavLinkMatch.All" class="nav-link" @onclick="CloseMenu">Головна</NavLink>
+                    <a href="/#about" class="nav-link" @onclick="CloseMenu">Про школу</a>
+                    <a href="/#schedule" class="nav-link" @onclick="CloseMenu">Розклад</a>
+                    <a href="/#events" class="nav-link" @onclick="CloseMenu">Заходи</a>
+                </div>
+
+                <div class="nav-actions">
+                    <AuthorizeView>
+                        <Authorized>
+                            <NavLink href="Account/Manage" class="nav-user" @onclick="CloseMenu">
+                                <span class="nav-user-avatar" aria-hidden="true">@(GetInitials(context.User.Identity?.Name))</span>
+                                <span class="nav-user-name">@context.User.Identity?.Name</span>
+                            </NavLink>
+                            <form action="Account/Logout" method="post" class="nav-form">
+                                <AntiforgeryToken />
+                                <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                                <button type="submit" class="nav-link-btn nav-link-btn--ghost">Вийти</button>
+                            </form>
+                        </Authorized>
+                        <NotAuthorized>
+                            <NavLink href="Account/Register" class="nav-link-btn nav-link-btn--ghost" @onclick="CloseMenu">Реєстрація</NavLink>
+                            <NavLink href="Account/Login" class="nav-cta" @onclick="CloseMenu">Увійти</NavLink>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </div>
+
+                <button type="button"
+                        class="nav-burger @(menuOpen ? "nav-burger--open" : "")"
+                        aria-label="@(menuOpen ? "Закрити меню" : "Відкрити меню")"
+                        aria-expanded="@menuOpen"
+                        @onclick="ToggleMenu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
             </div>
-
-            <div class="nav-actions">
-                <AuthorizeView>
-                    <Authorized>
-                        <NavLink href="Account/Manage" class="nav-user" @onclick="CloseMenu">
-                            <span class="nav-user-avatar" aria-hidden="true">@(GetInitials(context.User.Identity?.Name))</span>
-                            <span class="nav-user-name">@context.User.Identity?.Name</span>
-                        </NavLink>
-                        <form action="Account/Logout" method="post" class="nav-form">
-                            <AntiforgeryToken />
-                            <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                            <button type="submit" class="nav-link-btn nav-link-btn--ghost">Вийти</button>
-                        </form>
-                    </Authorized>
-                    <NotAuthorized>
-                        <NavLink href="Account/Register" class="nav-link-btn nav-link-btn--ghost" @onclick="CloseMenu">Реєстрація</NavLink>
-                        <NavLink href="Account/Login" class="nav-cta" @onclick="CloseMenu">Увійти</NavLink>
-                    </NotAuthorized>
-                </AuthorizeView>
-            </div>
-
-            <button type="button"
-                    class="nav-burger @(menuOpen ? "nav-burger--open" : "")"
-                    aria-label="@(menuOpen ? "Закрити меню" : "Відкрити меню")"
-                    aria-expanded="@menuOpen"
-                    @onclick="ToggleMenu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
         </div>
-    </div>
-</header>
+    </header>
 
-@if (menuOpen)
-{
-    <div class="nav-overlay" @onclick="CloseMenu"></div>
-}
+    <div class="nav-overlay @(menuOpen ? "nav-overlay--visible" : "")" @onclick="CloseMenu"></div>
 
-<nav class="nav-drawer @(menuOpen ? "nav-drawer--open" : "")" aria-hidden="@(!menuOpen)">
-    <div class="nav-drawer-header">
-        <span class="nav-drawer-title">Меню</span>
-        <button type="button" class="nav-drawer-close" aria-label="Закрити" @onclick="CloseMenu">✕</button>
-    </div>
+    <nav class="nav-drawer @(menuOpen ? "nav-drawer--open" : "")" aria-hidden="@(!menuOpen)">
+        <div class="nav-drawer-header">
+            <span class="nav-drawer-title">Меню</span>
+            <button type="button" class="nav-drawer-close" aria-label="Закрити" @onclick="CloseMenu">✕</button>
+        </div>
 
-    <div class="nav-drawer-links">
-        <NavLink href="" Match="NavLinkMatch.All" class="nav-drawer-link" @onclick="CloseMenu">🏠 Головна</NavLink>
-        <a href="/#about" class="nav-drawer-link" @onclick="CloseMenu">📚 Про школу</a>
-        <a href="/#schedule" class="nav-drawer-link" @onclick="CloseMenu">📅 Розклад</a>
-        <a href="/#events" class="nav-drawer-link" @onclick="CloseMenu">🎉 Заходи</a>
-    </div>
+        <div class="nav-drawer-links">
+            <NavLink href="" Match="NavLinkMatch.All" class="nav-drawer-link" @onclick="CloseMenu">🏠 Головна</NavLink>
+            <a href="/#about" class="nav-drawer-link" @onclick="CloseMenu">📚 Про школу</a>
+            <a href="/#schedule" class="nav-drawer-link" @onclick="CloseMenu">📅 Розклад</a>
+            <a href="/#events" class="nav-drawer-link" @onclick="CloseMenu">🎉 Заходи</a>
+        </div>
 
-    <div class="nav-drawer-actions">
-        <AuthorizeView>
-            <Authorized>
-                <NavLink href="Account/Manage" class="nav-drawer-link" @onclick="CloseMenu">👤 @context.User.Identity?.Name</NavLink>
-                <form action="Account/Logout" method="post" class="nav-form nav-form--drawer">
-                    <AntiforgeryToken />
-                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                    <button type="submit" class="nav-drawer-link nav-drawer-link--btn">Вийти</button>
-                </form>
-            </Authorized>
-            <NotAuthorized>
-                <NavLink href="Account/Register" class="nav-drawer-link" @onclick="CloseMenu">Реєстрація</NavLink>
-                <NavLink href="Account/Login" class="nav-cta nav-cta--full" @onclick="CloseMenu">Увійти</NavLink>
-            </NotAuthorized>
-        </AuthorizeView>
-    </div>
-</nav>
+        <div class="nav-drawer-actions">
+            <AuthorizeView>
+                <Authorized>
+                    <NavLink href="Account/Manage" class="nav-drawer-link" @onclick="CloseMenu">👤 @context.User.Identity?.Name</NavLink>
+                    <form action="Account/Logout" method="post" class="nav-form nav-form--drawer">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <button type="submit" class="nav-drawer-link nav-drawer-link--btn">Вийти</button>
+                    </form>
+                </Authorized>
+                <NotAuthorized>
+                    <NavLink href="Account/Register" class="nav-drawer-link" @onclick="CloseMenu">Реєстрація</NavLink>
+                    <NavLink href="Account/Login" class="nav-cta nav-cta--full" @onclick="CloseMenu">Увійти</NavLink>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </nav>
+</div>
 
 @code {
     private string? currentUrl;
@@ -111,7 +110,7 @@
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         menuOpen = false;
-        StateHasChanged();
+        InvokeAsync(StateHasChanged);
     }
 
     private void ToggleMenu() => menuOpen = !menuOpen;

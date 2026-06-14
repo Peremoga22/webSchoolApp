@@ -1,0 +1,72 @@
+@using System.Globalization
+
+@if (Slides.Count > 1)
+{
+    var duration = Slides.Count * IntervalSeconds;
+    var step = 100.0 / Slides.Count;
+    var sliderId = $"hero-{Slides.Count}-{IntervalSeconds}";
+
+    <style>
+        @@keyframes @sliderId-fade {
+            0% { opacity: 1; z-index: 1; }
+            @(step.ToString("F4", CultureInfo.InvariantCulture))% { opacity: 1; z-index: 1; }
+            @((step + 0.01).ToString("F4", CultureInfo.InvariantCulture))% { opacity: 0; z-index: 0; }
+            100% { opacity: 0; z-index: 0; }
+        }
+
+        .@sliderId .hero-slide {
+            animation: @sliderId-fade @(duration)s infinite;
+        }
+
+        @for (var i = 0; i < Slides.Count; i++)
+        {
+            <text>
+            .@sliderId .hero-slide:nth-child(@(i + 1)) {
+                animation-delay: @(-i * IntervalSeconds)s;
+            }
+            .@sliderId .hero-slider-dot:nth-child(@(i + 1)) {
+                animation: @sliderId-dot @(duration)s infinite;
+                animation-delay: @(-i * IntervalSeconds)s;
+            }
+            </text>
+        }
+
+        @@keyframes @sliderId-dot {
+            0%, @((step - 0.5).ToString("F4", CultureInfo.InvariantCulture))% { width: 22px; border-radius: 6px; background: white; }
+            @((step + 0.5).ToString("F4", CultureInfo.InvariantCulture))%, 100% { width: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.45); }
+        }
+    </style>
+}
+
+<div class="hero-slider @(Slides.Count > 1 ? $"hero-{Slides.Count}-{IntervalSeconds}" : "")">
+    <div class="hero-slider-track">
+        @for (var i = 0; i < Slides.Count; i++)
+        {
+            var slide = Slides[i];
+            <img src="@slide.Src"
+                 alt="@slide.Alt"
+                 class="hero-slide @(Slides.Count == 1 ? "hero-slide--active" : "")"
+                 loading="@(i == 0 ? "eager" : "lazy")" />
+        }
+    </div>
+
+    @if (Slides.Count > 1)
+    {
+        <div class="hero-slider-dots" role="tablist" aria-label="Фото школи">
+            @for (var i = 0; i < Slides.Count; i++)
+            {
+                <span class="hero-slider-dot" role="tab" aria-label="Фото @(i + 1)"></span>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<HeroSlide> Slides { get; set; } = [];
+
+    [Parameter]
+    public int IntervalSeconds { get; set; } = 5;
+
+    public record HeroSlide(string Src, string Alt);
+}
