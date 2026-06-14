@@ -1,7 +1,97 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>SchoolSpace — Головна</PageTitle>
 
-<h1>Hello, world!</h1>
+<section class="hero">
+    <div class="hero-text">
+        <h1>Сучасний сайт <span>для школи</span></h1>
+        <p>
+            Інформаційна система для учнів, батьків та вчителів:
+            новини, заходи, розклад занять і важливі оголошення.
+        </p>
+        <a href="#schedule" class="hero-btn">Переглянути розклад</a>
+    </div>
 
-Welcome to your new app.
+    <div class="hero-card">
+        <img src="images/school.svg" alt="Школа">
+        <div class="floating-box">Навчання • Заходи • Розклад</div>
+    </div>
+</section>
+
+<section class="section">
+    <h2 class="section-title">Чому <span>SchoolSpace</span>?</h2>
+    <div class="cards">
+        <div class="feature-card">
+            <div class="card-icon">📚</div>
+            <h3>Навчання</h3>
+            <p>Розклад уроків, домашні завдання та матеріали для учнів у зручному форматі.</p>
+        </div>
+        <div class="feature-card event-card">
+            <div class="card-icon">🎉</div>
+            <h3>Заходи</h3>
+            <p>Шкільні події, олімпіади, екскурсії — усі оголошення в одному місці.</p>
+        </div>
+        <div class="feature-card">
+            <div class="card-icon">📅</div>
+            <h3>Розклад</h3>
+            <p>Актуальний розклад занять для кожного класу з можливістю швидкого пошуку.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="schedule">
+    <h2 class="section-title">Розклад <span>занять</span></h2>
+    <div class="schedule-box">
+        <table class="schedule-table">
+            <thead>
+                <tr>
+                    <th>Час</th>
+                    <th>Понеділок</th>
+                    <th>Вівторок</th>
+                    <th>Середа</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>08:30 – 09:15</td>
+                    <td>Математика</td>
+                    <td>Українська мова</td>
+                    <td>Англійська мова</td>
+                </tr>
+                <tr>
+                    <td>09:25 – 10:10</td>
+                    <td>Історія</td>
+                    <td>Фізика</td>
+                    <td>Біологія</td>
+                </tr>
+                <tr>
+                    <td>10:20 – 11:05</td>
+                    <td>Інформатика</td>
+                    <td>Хімія</td>
+                    <td>Географія</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="section">
+    <h2 class="section-title">Найближчі <span>заходи</span></h2>
+    <div class="cards">
+        <div class="feature-card event-card">
+            <span class="event-date">20 червня</span>
+            <h3>День відкритих дверей</h3>
+            <p>Запрошуємо батьків та майбутніх учнів на екскурсію школою.</p>
+        </div>
+        <div class="feature-card event-card">
+            <span class="event-date">25 червня</span>
+            <h3>Олімпіада з математики</h3>
+            <p>Шкільний етап Всеукраїнської олімпіади для учнів 5–11 класів.</p>
+        </div>
+        <div class="feature-card event-card">
+            <span class="event-date">1 липня</span>
+            <h3>Літній табір</h3>
+            <p>Реєстрація на мовний та спортивний табір під час канікул.</p>
+        </div>
+    </div>
+</section>

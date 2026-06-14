@@ -3,17 +3,18 @@
 
 <PageTitle>Weather</PageTitle>
 
-<h1>Weather</h1>
+<div class="page-content">
+    <h1>Weather</h1>
 
-<p>This component demonstrates showing data.</p>
+    <p>This component demonstrates showing data.</p>
 
-@if (forecasts == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
+    @if (forecasts == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <table class="table">
         <thead>
             <tr>
                 <th>Date</th>
@@ -34,7 +35,8 @@ else
             }
         </tbody>
     </table>
-}
+    }
+</div>
 
 @code {
     private WeatherForecast[]? forecasts;

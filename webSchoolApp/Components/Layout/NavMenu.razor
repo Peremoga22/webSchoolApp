@@ -1,69 +1,42 @@
-﻿@implements IDisposable
+﻿@rendermode InteractiveServer
+@implements IDisposable
 
 @inject NavigationManager NavigationManager
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">webSchoolApp</a>
-    </div>
-</div>
+<div class="header-nav">
+    <button type="button"
+            class="nav-burger @(menuOpen ? "nav-burger--open" : "")"
+            aria-label="@(menuOpen ? "Закрити меню" : "Відкрити меню")"
+            aria-expanded="@menuOpen"
+            @onclick="ToggleMenu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+    @if (menuOpen)
+    {
+        <div class="nav-overlay" @onclick="CloseMenu"></div>
+    }
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="auth">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
-            </NavLink>
-        </div>
+    <nav class="nav @(menuOpen ? "nav--open" : "")">
+        <NavLink href="" Match="NavLinkMatch.All" @onclick="CloseMenu">Головна</NavLink>
+        <NavLink href="counter" @onclick="CloseMenu">Лічильник</NavLink>
+        <NavLink href="weather" @onclick="CloseMenu">Погода</NavLink>
+        <NavLink href="auth" @onclick="CloseMenu">Авторизація</NavLink>
 
         <AuthorizeView>
             <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                        </button>
-                    </form>
-                </div>
+                <NavLink href="Account/Manage" @onclick="CloseMenu">@context.User.Identity?.Name</NavLink>
+                <form action="Account/Logout" method="post" class="nav-form">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                    <button type="submit" class="nav-link-btn">Вийти</button>
+                </form>
             </Authorized>
             <NotAuthorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
-                    </NavLink>
-                </div>
+                <NavLink href="Account/Register" @onclick="CloseMenu">Реєстрація</NavLink>
+                <NavLink href="Account/Login" @onclick="CloseMenu">Увійти</NavLink>
             </NotAuthorized>
         </AuthorizeView>
     </nav>
@@ -71,6 +44,7 @@
 
 @code {
     private string? currentUrl;
+    private bool menuOpen;
 
     protected override void OnInitialized()
     {
@@ -81,12 +55,16 @@
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        menuOpen = false;
         StateHasChanged();
     }
+
+    private void ToggleMenu() => menuOpen = !menuOpen;
+
+    private void CloseMenu() => menuOpen = false;
 
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }
-
