@@ -1,0 +1,187 @@
+@page "/podiyi"
+
+<PageTitle>Події — SchoolSpace</PageTitle>
+
+<div class="page-content">
+    <div class="page-hero">
+        <span class="page-hero-icon">🎉</span>
+        <h1 class="page-hero-title">Події</h1>
+        <p class="page-hero-lead">Шкільні події, олімпіади, екскурсії — усі оголошення в одному місці.</p>
+    </div>
+
+    <section class="section section--compact">
+        <h2 class="section-title">Найближчі <span>заходи</span></h2>
+        <div class="cards">
+            @foreach (var evt in upcomingEvents)
+            {
+                <div class="feature-card event-card">
+                    <span class="event-date">@evt.Date.ToString("d MMMM", ukCulture)</span>
+                    <h3>@evt.Title</h3>
+                    <p>@evt.Description</p>
+                    <div class="event-meta">
+                        <span>🕐 @evt.Time</span>
+                        <span>📍 @evt.Location</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(evt.RegistrationLink))
+                    {
+                        <a href="@evt.RegistrationLink" class="material-link">Зареєструватися →</a>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="section section--compact">
+        <h2 class="section-title">Олімпіади та <span>конкурси</span></h2>
+        <div class="data-table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Назва</th>
+                        <th>Предмет</th>
+                        <th>Класи</th>
+                        <th>Дата</th>
+                        <th>Реєстрація</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var olympiad in olympiads)
+                    {
+                        <tr>
+                            <td><strong>@olympiad.Name</strong></td>
+                            <td>@olympiad.Subject</td>
+                            <td>@olympiad.Grades</td>
+                            <td>@olympiad.Date.ToString("dd.MM.yyyy")</td>
+                            <td>
+                                @if (olympiad.RegistrationOpen)
+                                {
+                                    <span class="status-badge status-badge--active">Відкрита</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge status-badge--done">Завершена</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section section--compact">
+        <h2 class="section-title">Екскурсії та <span>виїзди</span></h2>
+        <div class="cards">
+            @foreach (var trip in excursions)
+            {
+                <div class="feature-card">
+                    <div class="card-icon">🚌</div>
+                    <h3>@trip.Title</h3>
+                    <p>@trip.Description</p>
+                    <div class="event-meta">
+                        <span>📅 @trip.Date.ToString("d MMMM yyyy", ukCulture)</span>
+                        <span>👥 @trip.Participants учасників</span>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+@code {
+    private static readonly System.Globalization.CultureInfo ukCulture =
+        new("uk-UA");
+
+    private sealed record SchoolEvent(
+        string Title,
+        string Description,
+        DateTime Date,
+        string Time,
+        string Location,
+        string? RegistrationLink = null);
+
+    private sealed record Olympiad(
+        string Name,
+        string Subject,
+        string Grades,
+        DateTime Date,
+        bool RegistrationOpen);
+
+    private sealed record Excursion(
+        string Title,
+        string Description,
+        DateTime Date,
+        int Participants);
+
+    private static readonly IReadOnlyList<SchoolEvent> upcomingEvents =
+    [
+        new(
+            "Весняний концерт",
+            "Святкова програма з виступами хору, оркестру та театральної студії школи.",
+            new DateTime(2026, 6, 28),
+            "17:00",
+            "Актова зала",
+            "#"),
+        new(
+            "Обласна олімпіада з математики",
+            "Відбірковий етап до Всеукраїнської олімпіади. Тривалість — 4 години.",
+            new DateTime(2026, 7, 5),
+            "09:00",
+            "Каб. 214",
+            "#"),
+        new(
+            "Екскурсія до Музею науки",
+            "Пізнавальна поїздка для учнів 8–9 класів з інтерактивними експонатами.",
+            new DateTime(2026, 7, 10),
+            "10:00",
+            "Збір біля школи",
+            "#"),
+        new(
+            "День відкритих дверей",
+            "Запрошуємо батьків та майбутніх учнів на екскурсію школою та знайомство з педагогами.",
+            new DateTime(2026, 6, 20),
+            "14:00",
+            "Головний корпус"),
+        new(
+            "Літній мовний табір",
+            "Інтенсивні заняття з англійської та німецької мови під час канікул.",
+            new DateTime(2026, 7, 1),
+            "09:00",
+            "Мовний кабінет",
+            "#"),
+        new(
+            "Спортивні змагання «Олімпійська весна»",
+            "Естафети, стрибки в довжину та змагання з волейболу між класами.",
+            new DateTime(2026, 6, 25),
+            "10:00",
+            "Спортивний майданчик"),
+    ];
+
+    private static readonly IReadOnlyList<Olympiad> olympiads =
+    [
+        new("Шкільний етап — математика", "Математика", "5–11", new DateTime(2026, 6, 25), true),
+        new("Шкільний етап — фізика", "Фізика", "7–11", new DateTime(2026, 6, 27), true),
+        new("Обласний етап — українська мова", "Українська мова", "8–11", new DateTime(2026, 7, 8), true),
+        new("Конкурс «Знавець історії»", "Історія", "6–11", new DateTime(2026, 6, 15), false),
+        new("Олімпіада з інформатики", "Інформатика", "9–11", new DateTime(2026, 7, 12), true),
+    ];
+
+    private static readonly IReadOnlyList<Excursion> excursions =
+    [
+        new(
+            "Музей науки та технологій",
+            "Інтерактивні експозиції, лабораторія фізики та планетарій.",
+            new DateTime(2026, 7, 10),
+            28),
+        new(
+            "Національний музей історії України",
+            "Екскурсія з історії України від Київської Русі до сучасності.",
+            new DateTime(2026, 5, 15),
+            32),
+        new(
+            "Ботанічний сад",
+            "Практичне заняття з біології на свіжому повітрі.",
+            new DateTime(2026, 5, 22),
+            24),
+    ];
+}

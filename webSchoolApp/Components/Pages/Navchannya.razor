@@ -1,0 +1,103 @@
+@page "/navchannya"
+
+<PageTitle>Навчання — SchoolSpace</PageTitle>
+
+<div class="page-content">
+    <div class="page-hero">
+        <span class="page-hero-icon">📚</span>
+        <h1 class="page-hero-title">Навчання</h1>
+        <p class="page-hero-lead">Розклад уроків, домашні завдання та навчальні матеріали для учнів.</p>
+    </div>
+
+    <section class="section section--compact">
+        <h2 class="section-title">Предмети <span>9-Б</span></h2>
+        <div class="cards">
+            @foreach (var subject in subjects)
+            {
+                <div class="feature-card">
+                    <div class="card-icon">@subject.Icon</div>
+                    <h3>@subject.Name</h3>
+                    <p>@subject.Teacher</p>
+                    <span class="badge">@subject.LessonsPerWeek уроків/тиждень</span>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="section section--compact">
+        <h2 class="section-title">Домашні <span>завдання</span></h2>
+        <div class="data-table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Предмет</th>
+                        <th>Завдання</th>
+                        <th>Термін здачі</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var hw in homework)
+                    {
+                        <tr>
+                            <td><strong>@hw.Subject</strong></td>
+                            <td>@hw.Task</td>
+                            <td>@hw.Deadline.ToString("dd.MM.yyyy")</td>
+                            <td><span class="status-badge status-badge--@hw.StatusClass">@hw.Status</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section section--compact">
+        <h2 class="section-title">Навчальні <span>матеріали</span></h2>
+        <div class="cards">
+            @foreach (var material in materials)
+            {
+                <div class="feature-card">
+                    <span class="material-type">@material.Type</span>
+                    <h3>@material.Title</h3>
+                    <p>@material.Description</p>
+                    <a href="@material.Link" class="material-link">Відкрити матеріал →</a>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+@code {
+    private sealed record Subject(string Name, string Teacher, string Icon, int LessonsPerWeek);
+    private sealed record Homework(string Subject, string Task, DateTime Deadline, string Status, string StatusClass);
+    private sealed record Material(string Title, string Description, string Type, string Link);
+
+    private static readonly IReadOnlyList<Subject> subjects =
+    [
+        new("Математика", "Іваненко О.П.", "🔢", 5),
+        new("Українська мова", "Коваленко М.В.", "📝", 4),
+        new("Англійська мова", "Петренко А.С.", "🇬🇧", 3),
+        new("Фізика", "Сидоренко В.І.", "⚛️", 3),
+        new("Історія України", "Мельник Т.Г.", "🏛️", 2),
+        new("Біологія", "Шевченко Л.О.", "🧬", 2),
+    ];
+
+    private static readonly IReadOnlyList<Homework> homework =
+    [
+        new("Математика", "Розв'язати задачі № 145–152 (розділ «Квадратні рівняння»)", new DateTime(2026, 6, 20), "Активне", "active"),
+        new("Українська мова", "Написати твір-роздум на тему «Моя мрія» (1,5 стор.)", new DateTime(2026, 6, 22), "Активне", "active"),
+        new("Англійська мова", "Підготувати презентацію про улюблене хобі (5 слайдів)", new DateTime(2026, 6, 24), "Активне", "active"),
+        new("Фізика", "Лабораторна робота № 8: вимірювання опору провідника", new DateTime(2026, 6, 18), "Прострочено", "overdue"),
+        new("Історія України", "Підготувати доповідь про Київську Русь", new DateTime(2026, 6, 25), "Активне", "active"),
+        new("Біологія", "Скласти таблицю класифікації хордових тварин", new DateTime(2026, 6, 19), "Здано", "done"),
+    ];
+
+    private static readonly IReadOnlyList<Material> materials =
+    [
+        new("Алгебра: квадратні рівняння", "Презентація з прикладами розв'язання та формулами", "PDF", "#"),
+        new("Граматика української мови", "Відеолекція про правопис прислівників", "Відео", "#"),
+        new("English Grammar B1", "Інтерактивні вправи на Present Perfect", "Інтерактив", "#"),
+        new("Фізика: електричний струм", "Підручник, розділ 12 — електричні кола", "PDF", "#"),
+        new("Історія: Київська Русь", "Карти та ілюстрації для підготовки доповіді", "Зображення", "#"),
+    ];
+}

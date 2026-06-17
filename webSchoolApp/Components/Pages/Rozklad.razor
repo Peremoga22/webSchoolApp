@@ -1,0 +1,199 @@
+@page "/rozklad"
+@rendermode InteractiveServer
+
+<PageTitle>Розклад — SchoolSpace</PageTitle>
+
+<div class="page-content">
+    <div class="page-hero">
+        <span class="page-hero-icon">📅</span>
+        <h1 class="page-hero-title">Розклад занять</h1>
+        <p class="page-hero-lead">Актуальний розклад для кожного класу з можливістю швидкого пошуку.</p>
+    </div>
+
+    <section class="section section--compact">
+        <div class="schedule-filter">
+            <label for="class-select">Оберіть клас:</label>
+            <select id="class-select" class="schedule-select" @bind="selectedClass">
+                @foreach (var cls in availableClasses)
+                {
+                    <option value="@cls">@cls</option>
+                }
+            </select>
+        </div>
+
+        <h2 class="section-title">Тижневий розклад <span>@selectedClass</span></h2>
+
+        <div class="schedule-grid">
+            @foreach (var day in weekDays)
+            {
+                <div class="schedule-day">
+                    <h3 class="schedule-day-title">@day.Name</h3>
+                    @{
+                        var lessons = GetLessonsForDay(day.Index);
+                    }
+                    @if (lessons.Count == 0)
+                    {
+                        <p class="schedule-empty">Вихідний</p>
+                    }
+                    else
+                    {
+                        @foreach (var lesson in lessons)
+                        {
+                            <div class="schedule-lesson">
+                                <span class="schedule-lesson-num">@lesson.Number</span>
+                                <div class="schedule-lesson-info">
+                                    <strong>@lesson.Subject</strong>
+                                    <span>@lesson.Teacher · каб. @lesson.Room</span>
+                                    <span class="schedule-lesson-time">@lesson.Time</span>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="section section--compact">
+        <h2 class="section-title">Дзвінки <span>школи</span></h2>
+        <div class="cards">
+            @foreach (var bell in bells)
+            {
+                <div class="feature-card">
+                    <h3>@bell.Number-й урок</h3>
+                    <p>@bell.Start – @bell.End</p>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+@code {
+    private string selectedClass = "9-Б";
+
+    private static readonly IReadOnlyList<string> availableClasses =
+        ["7-А", "7-Б", "8-А", "8-Б", "9-А", "9-Б", "10-А", "11-А"];
+
+    private sealed record WeekDay(string Name, int Index);
+    private sealed record Lesson(int Number, string Subject, string Teacher, string Room, string Time);
+    private sealed record Bell(int Number, string Start, string End);
+
+    private static readonly IReadOnlyList<WeekDay> weekDays =
+    [
+        new("Понеділок", 1),
+        new("Вівторок", 2),
+        new("Середа", 3),
+        new("Четвер", 4),
+        new("П'ятниця", 5),
+    ];
+
+    private static readonly IReadOnlyList<Bell> bells =
+    [
+        new(1, "08:30", "09:15"),
+        new(2, "09:25", "10:10"),
+        new(3, "10:20", "11:05"),
+        new(4, "11:15", "12:00"),
+        new(5, "12:20", "13:05"),
+        new(6, "13:15", "14:00"),
+        new(7, "14:10", "14:55"),
+    ];
+
+    private static readonly Dictionary<string, Dictionary<int, List<Lesson>>> schedules = new()
+    {
+        ["9-Б"] = new()
+        {
+            [1] =
+            [
+                new(1, "Математика", "Іваненко О.П.", "214", "08:30–09:15"),
+                new(2, "Українська мова", "Коваленко М.В.", "105", "09:25–10:10"),
+                new(3, "Англійська мова", "Петренко А.С.", "301", "10:20–11:05"),
+                new(4, "Фізика", "Сидоренко В.І.", "212", "11:15–12:00"),
+                new(5, "Фізкультура", "Бондаренко І.М.", "спортзал", "12:20–13:05"),
+            ],
+            [2] =
+            [
+                new(1, "Історія України", "Мельник Т.Г.", "108", "08:30–09:15"),
+                new(2, "Математика", "Іваненко О.П.", "214", "09:25–10:10"),
+                new(3, "Біологія", "Шевченко Л.О.", "210", "10:20–11:05"),
+                new(4, "Англійська мова", "Петренко А.С.", "301", "11:15–12:00"),
+                new(5, "Інформатика", "Лисенко Д.В.", "комп.кл.", "12:20–13:05"),
+                new(6, "Література", "Коваленко М.В.", "105", "13:15–14:00"),
+            ],
+            [3] =
+            [
+                new(1, "Хімія", "Гриценко Н.А.", "213", "08:30–09:15"),
+                new(2, "Математика", "Іваненко О.П.", "214", "09:25–10:10"),
+                new(3, "Географія", "Романюк П.К.", "109", "10:20–11:05"),
+                new(4, "Українська мова", "Коваленко М.В.", "105", "11:15–12:00"),
+                new(5, "Фізика", "Сидоренко В.І.", "212", "12:20–13:05"),
+            ],
+            [4] =
+            [
+                new(1, "Англійська мова", "Петренко А.С.", "301", "08:30–09:15"),
+                new(2, "Математика", "Іваненко О.П.", "214", "09:25–10:10"),
+                new(3, "Мистецтво", "Ткаченко Ю.Р.", "мал.кл.", "10:20–11:05"),
+                new(4, "Біологія", "Шевченко Л.О.", "210", "11:15–12:00"),
+                new(5, "Фізкультура", "Бондаренко І.М.", "спортзал", "12:20–13:05"),
+            ],
+            [5] =
+            [
+                new(1, "Українська мова", "Коваленко М.В.", "105", "08:30–09:15"),
+                new(2, "Математика", "Іваненко О.П.", "214", "09:25–10:10"),
+                new(3, "Історія України", "Мельник Т.Г.", "108", "10:20–11:05"),
+                new(4, "Англійська мова", "Петренко А.С.", "301", "11:15–12:00"),
+                new(5, "Трудове навчання", "Кравченко С.П.", "майстерня", "12:20–13:05"),
+            ],
+        },
+        ["7-А"] = new()
+        {
+            [1] =
+            [
+                new(1, "Математика", "Білоус Н.І.", "201", "08:30–09:15"),
+                new(2, "Українська мова", "Захаренко О.В.", "101", "09:25–10:10"),
+                new(3, "Англійська мова", "Петренко А.С.", "301", "10:20–11:05"),
+                new(4, "Природознавство", "Шевченко Л.О.", "210", "11:15–12:00"),
+            ],
+            [2] =
+            [
+                new(1, "Музика", "Ткаченко Ю.Р.", "муз.кл.", "08:30–09:15"),
+                new(2, "Математика", "Білоус Н.І.", "201", "09:25–10:10"),
+                new(3, "Література", "Захаренко О.В.", "101", "10:20–11:05"),
+                new(4, "Фізкультура", "Бондаренко І.М.", "спортзал", "11:15–12:00"),
+            ],
+            [3] =
+            [
+                new(1, "Математика", "Білоус Н.І.", "201", "08:30–09:15"),
+                new(2, "Історія", "Мельник Т.Г.", "108", "09:25–10:10"),
+                new(3, "Англійська мова", "Петренко А.С.", "301", "10:20–11:05"),
+                new(4, "Малювання", "Ткаченко Ю.Р.", "мал.кл.", "11:15–12:00"),
+            ],
+            [4] =
+            [
+                new(1, "Українська мова", "Захаренко О.В.", "101", "08:30–09:15"),
+                new(2, "Математика", "Білоус Н.І.", "201", "09:25–10:10"),
+                new(3, "Інформатика", "Лисенко Д.В.", "комп.кл.", "10:20–11:05"),
+                new(4, "Англійська мова", "Петренко А.С.", "301", "11:15–12:00"),
+            ],
+            [5] =
+            [
+                new(1, "Математика", "Білоус Н.І.", "201", "08:30–09:15"),
+                new(2, "Природознавство", "Шевченко Л.О.", "210", "09:25–10:10"),
+                new(3, "Українська мова", "Захаренко О.В.", "101", "10:20–11:05"),
+                new(4, "Трудове навчання", "Кравченко С.П.", "майстерня", "11:15–12:00"),
+            ],
+        },
+    };
+
+    private IReadOnlyList<Lesson> GetLessonsForDay(int dayIndex)
+    {
+        if (schedules.TryGetValue(selectedClass, out var classSchedule)
+            && classSchedule.TryGetValue(dayIndex, out var lessons))
+        {
+            return lessons;
+        }
+
+        return schedules["9-Б"].TryGetValue(dayIndex, out var fallback)
+            ? fallback
+            : [];
+    }
+}
