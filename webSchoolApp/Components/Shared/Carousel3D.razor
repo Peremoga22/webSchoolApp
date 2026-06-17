@@ -6,12 +6,12 @@
 }
 else if (Slides.Count == 1)
 {
-    <div class="carousel-3d-wrapper">
+    <div class="carousel-3d-wrapper carousel-3d-wrapper--single">
         <div class="carousel-3d-single">
-            <img src="@Slides[0].Src" alt="@Slides[0].Alt" loading="eager" />
+            <img src="@Slides[0].Src" alt="@Slides[0].Alt" loading="eager" decoding="async" />
             @if (!string.IsNullOrWhiteSpace(Slides[0].Caption))
             {
-                <p class="carousel-3d-caption">@Slides[0].Caption</p>
+                <span class="carousel-3d-caption">@Slides[0].Caption</span>
             }
         </div>
     </div>
@@ -30,22 +30,41 @@ else
                 transform: rotateY(@(rotation)deg);
             }
 
-            .@carouselId:has(#@($"{carouselId}-{i}"):checked) .carousel-3d-prev-@i,
-            .@carouselId:has(#@($"{carouselId}-{i}"):checked) .carousel-3d-next-@i {
-                display: flex;
+            .@carouselId:has(#@($"{carouselId}-{i}"):checked) .carousel-3d-item:nth-child(@(i + 1)) .carousel-3d-card {
+                opacity: 1;
+                filter: saturate(1.05) brightness(1);
+                transform: scale(1.04);
+                box-shadow:
+                    0 32px 64px rgba(15, 23, 42, 0.34),
+                    0 0 0 1px rgba(255, 255, 255, 0.55) inset;
+            }
+
+            .@carouselId:has(#@($"{carouselId}-{i}"):checked) .carousel-3d-item:nth-child(@(i + 1)) {
+                z-index: 3;
             }
 
             .@carouselId:has(#@($"{carouselId}-{i}"):checked) .carousel-3d-dot:nth-child(@(i + 1)) {
-                width: 22px;
-                border-radius: 6px;
+                width: 24px;
+                border-radius: 999px;
                 background: linear-gradient(135deg, var(--primary), var(--secondary));
+                box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+            }
+
+            .@carouselId:has(#@($"{carouselId}-{i}"):checked) .carousel-3d-counter-item-@i {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
             }
             </text>
         }
     </style>
 
     <div class="carousel-3d-wrapper">
-        <div class="carousel-3d @carouselId" style="--count: @Slides.Count">
+        <div class="carousel-3d @carouselId"
+             data-carousel
+             style="--count: @Slides.Count"
+             role="region"
+             aria-roledescription="карусель"
+             aria-label="Галерея фото школи">
             @for (var i = 0; i < Slides.Count; i++)
             {
                 <input type="radio"
@@ -55,49 +74,74 @@ else
                        @(i == 0 ? "checked" : null) />
             }
 
-            <div class="carousel-3d-viewport">
-                <div class="carousel-3d-ring">
-                    @for (var i = 0; i < Slides.Count; i++)
-                    {
-                        var slide = Slides[i];
-                        var angle = (step * i).ToString("F4", CultureInfo.InvariantCulture);
+            <div class="carousel-3d-stage">
+                <div class="carousel-3d-viewport">
+                    <div class="carousel-3d-ambient" aria-hidden="true"></div>
 
-                        <div class="carousel-3d-item" style="--angle: @(angle)deg">
-                            <img src="@slide.Src"
-                                 alt="@slide.Alt"
-                                 loading="@(i == 0 ? "eager" : "lazy")" />
-                            @if (!string.IsNullOrWhiteSpace(slide.Caption))
-                            {
-                                <p class="carousel-3d-caption">@slide.Caption</p>
-                            }
-                        </div>
-                    }
+                    <button type="button"
+                            class="carousel-3d-fab carousel-3d-fab--prev"
+                            data-carousel-prev
+                            aria-label="Попереднє фото">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+
+                    <div class="carousel-3d-ring">
+                        @for (var i = 0; i < Slides.Count; i++)
+                        {
+                            var slide = Slides[i];
+                            var angle = (step * i).ToString("F4", CultureInfo.InvariantCulture);
+                            var itemId = $"{carouselId}-{i}";
+
+                            <label class="carousel-3d-item"
+                                   for="@itemId"
+                                   style="--angle: @(angle)deg"
+                                   aria-label="@slide.Alt">
+                                <span class="carousel-3d-card">
+                                    <img src="@slide.Src"
+                                         alt=""
+                                         loading="@(i == 0 ? "eager" : "lazy")"
+                                         decoding="async"
+                                         draggable="false" />
+                                    @if (!string.IsNullOrWhiteSpace(slide.Caption))
+                                    {
+                                        <span class="carousel-3d-caption">@slide.Caption</span>
+                                    }
+                                </span>
+                            </label>
+                        }
+                    </div>
+
+                    <button type="button"
+                            class="carousel-3d-fab carousel-3d-fab--next"
+                            data-carousel-next
+                            aria-label="Наступне фото">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
                 </div>
-            </div>
 
-            <div class="carousel-3d-nav" aria-label="Навігація галереї">
-                @for (var i = 0; i < Slides.Count; i++)
-                {
-                    var prev = (i - 1 + Slides.Count) % Slides.Count;
-                    var next = (i + 1) % Slides.Count;
+                <div class="carousel-3d-toolbar">
+                    <div class="carousel-3d-counter" aria-live="polite">
+                        @for (var i = 0; i < Slides.Count; i++)
+                        {
+                            <span class="carousel-3d-counter-item carousel-3d-counter-item-@i">
+                                <strong>@((i + 1).ToString("D2"))</strong>
+                                <span class="carousel-3d-counter-sep">/</span>
+                                @Slides.Count.ToString("D2")
+                            </span>
+                        }
+                    </div>
 
-                    <label class="carousel-3d-btn carousel-3d-prev carousel-3d-prev-@i"
-                           for="@($"{carouselId}-{prev}")"
-                           aria-label="Попереднє фото">‹</label>
+                    <div class="carousel-3d-dots" role="tablist" aria-label="Оберіть фото">
+                        @for (var i = 0; i < Slides.Count; i++)
+                        {
+                            <label class="carousel-3d-dot"
+                                   for="@($"{carouselId}-{i}")"
+                                   role="tab"
+                                   aria-label="Фото @(i + 1)"></label>
+                        }
+                    </div>
 
-                    <label class="carousel-3d-btn carousel-3d-next carousel-3d-next-@i"
-                           for="@($"{carouselId}-{next}")"
-                           aria-label="Наступне фото">›</label>
-                }
-
-                <div class="carousel-3d-dots" role="tablist">
-                    @for (var i = 0; i < Slides.Count; i++)
-                    {
-                        <label class="carousel-3d-dot"
-                               for="@($"{carouselId}-{i}")"
-                               role="tab"
-                               aria-label="Фото @(i + 1)"></label>
-                    }
+                    <p class="carousel-3d-hint" aria-hidden="true">← → або свайп</p>
                 </div>
             </div>
         </div>
