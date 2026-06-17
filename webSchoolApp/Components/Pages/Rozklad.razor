@@ -1,5 +1,4 @@
 @page "/rozklad"
-@rendermode InteractiveServer
 
 <PageTitle>Розклад — SchoolSpace</PageTitle>
 
@@ -11,26 +10,31 @@
     </div>
 
     <section class="section section--compact">
-        <div class="schedule-filter">
+        <form method="get" action="/rozklad" class="schedule-filter">
             <label for="class-select">Оберіть клас:</label>
-            <select id="class-select" class="schedule-select" @bind="selectedClass">
+            <select id="class-select" name="class" class="schedule-select" onchange="this.form.submit()">
                 @foreach (var cls in availableClasses)
                 {
-                    <option value="@cls">@cls</option>
+                    if (cls == SelectedClass)
+                    {
+                        <option value="@cls" selected>@cls</option>
+                    }
+                    else
+                    {
+                        <option value="@cls">@cls</option>
+                    }
                 }
             </select>
-        </div>
+        </form>
 
-        <h2 class="section-title">Тижневий розклад <span>@selectedClass</span></h2>
+        <h2 class="section-title">Тижневий розклад <span>@SelectedClass</span></h2>
 
         <div class="schedule-grid">
             @foreach (var day in weekDays)
             {
-                <div class="schedule-day">
+                var lessons = GetLessonsForDay(day.Index);
+                <div class="schedule-day" @key="day.Index">
                     <h3 class="schedule-day-title">@day.Name</h3>
-                    @{
-                        var lessons = GetLessonsForDay(day.Index);
-                    }
                     @if (lessons.Count == 0)
                     {
                         <p class="schedule-empty">Вихідний</p>
@@ -39,7 +43,7 @@
                     {
                         @foreach (var lesson in lessons)
                         {
-                            <div class="schedule-lesson">
+                            <div class="schedule-lesson" @key="lesson.Number">
                                 <span class="schedule-lesson-num">@lesson.Number</span>
                                 <div class="schedule-lesson-info">
                                     <strong>@lesson.Subject</strong>
@@ -59,7 +63,7 @@
         <div class="cards">
             @foreach (var bell in bells)
             {
-                <div class="feature-card">
+                <div class="feature-card" @key="bell.Number">
                     <h3>@bell.Number-й урок</h3>
                     <p>@bell.Start – @bell.End</p>
                 </div>
@@ -69,7 +73,13 @@
 </div>
 
 @code {
-    private string selectedClass = "9-Б";
+    [SupplyParameterFromQuery(Name = "class")]
+    private string? ClassQuery { get; set; }
+
+    private string SelectedClass =>
+        !string.IsNullOrEmpty(ClassQuery) && availableClasses.Contains(ClassQuery)
+            ? ClassQuery
+            : "9-Б";
 
     private static readonly IReadOnlyList<string> availableClasses =
         ["7-А", "7-Б", "8-А", "8-Б", "9-А", "9-Б", "10-А", "11-А"];
@@ -186,7 +196,7 @@
 
     private IReadOnlyList<Lesson> GetLessonsForDay(int dayIndex)
     {
-        if (schedules.TryGetValue(selectedClass, out var classSchedule)
+        if (schedules.TryGetValue(SelectedClass, out var classSchedule)
             && classSchedule.TryGetValue(dayIndex, out var lessons))
         {
             return lessons;

@@ -1215,7 +1215,8 @@ img {
     display: block;
 }
 
-.feature-card--link:hover {
+.feature-card--link:hover,
+.feature-card--link.active {
     color: inherit;
 }
 
