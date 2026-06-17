@@ -1,7 +1,16 @@
 @rendermode InteractiveServer
 @implements IDisposable
 
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Identity
+@using webSchoolApp.Data
+
+@using webSchoolApp.Components.Account
+
 @inject NavigationManager NavigationManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityRedirectManager RedirectManager
+@inject ILogger<SiteHeader> Logger
 
 <div class="site-header">
     <header class="header">
@@ -25,7 +34,7 @@
                 <div class="nav-pills">
                     <NavLink href="" Match="NavLinkMatch.All" class="nav-link" @onclick="CloseMenu">Головна</NavLink>
                     <a href="/#about" class="nav-link" @onclick="CloseMenu">Про школу</a>
-                    <a href="/#schedule" class="nav-link" @onclick="CloseMenu">Розклад</a>
+                    <a href="/#schedule" class="nav-link" @onclick="CloseMenu">Галерея</a>
                     <a href="/#events" class="nav-link" @onclick="CloseMenu">Заходи</a>
                 </div>
 
@@ -73,14 +82,14 @@
         <div class="nav-drawer-links">
             <NavLink href="" Match="NavLinkMatch.All" class="nav-drawer-link" @onclick="CloseMenu">🏠 Головна</NavLink>
             <a href="/#about" class="nav-drawer-link" @onclick="CloseMenu">📚 Про школу</a>
-            <a href="/#schedule" class="nav-drawer-link" @onclick="CloseMenu">📅 Розклад</a>
+            <a href="/#schedule" class="nav-drawer-link" @onclick="CloseMenu">🖼️ Галерея</a>
             <a href="/#events" class="nav-drawer-link" @onclick="CloseMenu">🎉 Заходи</a>
         </div>
 
         <div class="nav-drawer-actions">
-            <AuthorizeView>
+            <AuthorizeView Context="auth">
                 <Authorized>
-                    <NavLink href="Account/Manage" class="nav-drawer-link" @onclick="CloseMenu">👤 @context.User.Identity?.Name</NavLink>
+                    <NavLink href="Account/Manage" class="nav-drawer-link" @onclick="CloseMenu">👤 @auth.User.Identity?.Name</NavLink>
                     <form action="Account/Logout" method="post" class="nav-form nav-form--drawer">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
@@ -88,8 +97,24 @@
                     </form>
                 </Authorized>
                 <NotAuthorized>
+                    <EditForm Model="LoginInput" FormName="drawer-login" OnValidSubmit="LoginUserAsync" method="post" class="nav-drawer-login">
+                        <DataAnnotationsValidator />
+                        @if (!string.IsNullOrEmpty(loginError))
+                        {
+                            <p class="nav-drawer-login-error" role="alert">@loginError</p>
+                        }
+                        <div class="nav-drawer-field">
+                            <label for="drawer-login-email">Логін</label>
+                            <InputText @bind-Value="LoginInput.Email" id="drawer-login-email" class="nav-drawer-input" autocomplete="username" placeholder="email@example.com" />
+                        </div>
+                        <div class="nav-drawer-field">
+                            <label for="drawer-login-password">Пароль</label>
+                            <InputText type="password" @bind-Value="LoginInput.Password" id="drawer-login-password" class="nav-drawer-input" autocomplete="current-password" placeholder="••••••••" />
+                        </div>
+                        <button type="submit" class="nav-cta nav-cta--full">Увійти</button>
+                    </EditForm>
                     <NavLink href="Account/Register" class="nav-drawer-link" @onclick="CloseMenu">Реєстрація</NavLink>
-                    <NavLink href="Account/Login" class="nav-cta nav-cta--full" @onclick="CloseMenu">Увійти</NavLink>
+                    <NavLink href="Account/ForgotPassword" class="nav-drawer-link nav-drawer-link--muted" @onclick="CloseMenu">Забули пароль?</NavLink>
                 </NotAuthorized>
             </AuthorizeView>
         </div>
@@ -99,6 +124,10 @@
 @code {
     private string? currentUrl;
     private bool menuOpen;
+    private string? loginError;
+
+    [SupplyParameterFromForm(FormName = "drawer-login")]
+    private LoginInputModel LoginInput { get; set; } = new();
 
     protected override void OnInitialized()
     {
@@ -117,6 +146,41 @@
 
     private void CloseMenu() => menuOpen = false;
 
+    private async Task LoginUserAsync()
+    {
+        loginError = null;
+
+        var result = await SignInManager.PasswordSignInAsync(
+            LoginInput.Email,
+            LoginInput.Password,
+            LoginInput.RememberMe,
+            lockoutOnFailure: false);
+
+        if (result.Succeeded)
+        {
+            Logger.LogInformation("User logged in from mobile menu.");
+            menuOpen = false;
+            RedirectManager.RedirectTo(currentUrl);
+            return;
+        }
+
+        if (result.RequiresTwoFactor)
+        {
+            RedirectManager.RedirectTo(
+                "Account/LoginWith2fa",
+                new() { ["returnUrl"] = currentUrl, ["rememberMe"] = LoginInput.RememberMe });
+            return;
+        }
+
+        if (result.IsLockedOut)
+        {
+            RedirectManager.RedirectTo("Account/Lockout");
+            return;
+        }
+
+        loginError = "Невірний логін або пароль.";
+    }
+
     private static string GetInitials(string? name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -131,5 +195,18 @@
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+    private sealed class LoginInputModel
+    {
+        [Required(ErrorMessage = "Введіть логін")]
+        [EmailAddress(ErrorMessage = "Невірний формат email")]
+        public string Email { get; set; } = "";
+
+        [Required(ErrorMessage = "Введіть пароль")]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        public bool RememberMe { get; set; }
     }
 }

@@ -9,7 +9,7 @@
             Інформаційна система для учнів, батьків та вчителів:
             новини, заходи, розклад занять і важливі оголошення.
         </p>
-        <a href="#schedule" class="hero-btn">Переглянути розклад</a>
+        <a href="#schedule" class="hero-btn">Переглянути галерею</a>
     </div>
 
     <div class="hero-card">
@@ -40,39 +40,8 @@
 </section>
 
 <section class="section" id="schedule">
-    <h2 class="section-title">Розклад <span>занять</span></h2>
-    <div class="schedule-box">
-        <table class="schedule-table">
-            <thead>
-                <tr>
-                    <th>Час</th>
-                    <th>Понеділок</th>
-                    <th>Вівторок</th>
-                    <th>Середа</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>08:30 – 09:15</td>
-                    <td>Математика</td>
-                    <td>Українська мова</td>
-                    <td>Англійська мова</td>
-                </tr>
-                <tr>
-                    <td>09:25 – 10:10</td>
-                    <td>Історія</td>
-                    <td>Фізика</td>
-                    <td>Біологія</td>
-                </tr>
-                <tr>
-                    <td>10:20 – 11:05</td>
-                    <td>Інформатика</td>
-                    <td>Хімія</td>
-                    <td>Географія</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <h2 class="section-title">Фото <span>школи</span></h2>
+    <Carousel3D Slides="gallerySlides" />
 </section>
 
 <section class="section" id="events">
@@ -104,5 +73,14 @@
         new("images/school.svg", "Школа"),
         // new("images/photo2.jpg", "Опис фото"),
         // new("images/photo3.jpg", "Опис фото"),
+    ];
+
+    private static readonly IReadOnlyList<Carousel3D.CarouselSlide> gallerySlides =
+    [
+        new("images/images.jfif", "Шкільний захід", "Шкільний захід"),
+        new("images/school.svg", "Школа", "Наша школа"),
+        new("images/images.jfif", "Уроки", "Навчальний процес"),
+        new("images/f1.jpeg", "Спорт", "Спортивні змагання"),
+        new("images/f2.jpg", "Захід", "Шкільне свято"),
     ];
 }

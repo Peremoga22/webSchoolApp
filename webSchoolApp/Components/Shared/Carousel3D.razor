@@ -1,0 +1,112 @@
+@using System.Globalization
+
+@if (Slides.Count == 0)
+{
+    <p class="carousel-3d-empty">Додайте фото в <code>wwwroot/images/</code></p>
+}
+else if (Slides.Count == 1)
+{
+    <div class="carousel-3d-wrapper">
+        <div class="carousel-3d-single">
+            <img src="@Slides[0].Src" alt="@Slides[0].Alt" loading="eager" />
+            @if (!string.IsNullOrWhiteSpace(Slides[0].Caption))
+            {
+                <p class="carousel-3d-caption">@Slides[0].Caption</p>
+            }
+        </div>
+    </div>
+}
+else
+{
+    var step = 360.0 / Slides.Count;
+    var carouselId = $"c3d-{Slides.Count}";
+
+    <style>
+        @for (var i = 0; i < Slides.Count; i++)
+        {
+            var rotation = (-step * i).ToString("F4", CultureInfo.InvariantCulture);
+            <text>
+            .@carouselId:has(#@($"{carouselId}-{i}"):checked) .carousel-3d-ring {
+                transform: rotateY(@(rotation)deg);
+            }
+
+            .@carouselId:has(#@($"{carouselId}-{i}"):checked) .carousel-3d-prev-@i,
+            .@carouselId:has(#@($"{carouselId}-{i}"):checked) .carousel-3d-next-@i {
+                display: flex;
+            }
+
+            .@carouselId:has(#@($"{carouselId}-{i}"):checked) .carousel-3d-dot:nth-child(@(i + 1)) {
+                width: 22px;
+                border-radius: 6px;
+                background: linear-gradient(135deg, var(--primary), var(--secondary));
+            }
+            </text>
+        }
+    </style>
+
+    <div class="carousel-3d-wrapper">
+        <div class="carousel-3d @carouselId" style="--count: @Slides.Count">
+            @for (var i = 0; i < Slides.Count; i++)
+            {
+                <input type="radio"
+                       name="@carouselId"
+                       id="@($"{carouselId}-{i}")"
+                       class="carousel-3d-radio"
+                       @(i == 0 ? "checked" : null) />
+            }
+
+            <div class="carousel-3d-viewport">
+                <div class="carousel-3d-ring">
+                    @for (var i = 0; i < Slides.Count; i++)
+                    {
+                        var slide = Slides[i];
+                        var angle = (step * i).ToString("F4", CultureInfo.InvariantCulture);
+
+                        <div class="carousel-3d-item" style="--angle: @(angle)deg">
+                            <img src="@slide.Src"
+                                 alt="@slide.Alt"
+                                 loading="@(i == 0 ? "eager" : "lazy")" />
+                            @if (!string.IsNullOrWhiteSpace(slide.Caption))
+                            {
+                                <p class="carousel-3d-caption">@slide.Caption</p>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="carousel-3d-nav" aria-label="Навігація галереї">
+                @for (var i = 0; i < Slides.Count; i++)
+                {
+                    var prev = (i - 1 + Slides.Count) % Slides.Count;
+                    var next = (i + 1) % Slides.Count;
+
+                    <label class="carousel-3d-btn carousel-3d-prev carousel-3d-prev-@i"
+                           for="@($"{carouselId}-{prev}")"
+                           aria-label="Попереднє фото">‹</label>
+
+                    <label class="carousel-3d-btn carousel-3d-next carousel-3d-next-@i"
+                           for="@($"{carouselId}-{next}")"
+                           aria-label="Наступне фото">›</label>
+                }
+
+                <div class="carousel-3d-dots" role="tablist">
+                    @for (var i = 0; i < Slides.Count; i++)
+                    {
+                        <label class="carousel-3d-dot"
+                               for="@($"{carouselId}-{i}")"
+                               role="tab"
+                               aria-label="Фото @(i + 1)"></label>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<CarouselSlide> Slides { get; set; } = [];
+
+    public record CarouselSlide(string Src, string Alt, string? Caption = null);
+}
